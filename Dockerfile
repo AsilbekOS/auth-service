@@ -1,16 +1,15 @@
-FROM golang:1.20-alpine
-
-RUN apk update && apk add --no-cache git
-
+FROM golang:1.22.4 AS builder
 WORKDIR /app
-
-COPY go.mod go.sum ./
+COPY go.mod ./
+COPY go.sum ./
 RUN go mod download
 
 COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd
 
-RUN go build -o main ./cmd
+FROM alpine:latest
+WORKDIR /app
+COPY --from=builder /app/main .
 
-EXPOSE 8080
-
+EXPOSE 50051
 CMD ["./main"]
