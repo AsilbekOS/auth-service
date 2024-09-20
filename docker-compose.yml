@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: auth-service
+    ports:
+      - "8080:8080"
+    environment:
+      - JWT_SECRET=supersecretkey
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_NAME=authdb
+      - CURRENT_IP=127.0.0.1
+      - EMAIL_USER=your-email@example.com
+      - EMAIL_PASSWORD=your-email-password
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: postgres-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=authdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
